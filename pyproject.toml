@@ -1,0 +1,47 @@
+[project]
+name = "translate-agent"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "Adam Zhou", email = "summychou@gmail.com" },
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fire>=0.7.0",
+    "google-genai>=1.20.0",
+    "openai>=1.88.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+    "ruff>=0.11.12",
+]
+
+[[tool.uv.index]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[tool.ruff]
+lint.select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "T201",
+    "UP",
+]
+lint.ignore = [
+    "UP006",
+    "UP007",
+    # We actually do want to import from typing_extensions
+    "UP035",
+    "E501",
+    "T201",
+]
+line-length = 120
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "UP"]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
