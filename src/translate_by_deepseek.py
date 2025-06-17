@@ -2,8 +2,12 @@ import os
 import re
 
 from openai import OpenAI
+from openai._exceptions import APIError as OpenAIAPIError
+
+from retry_with_backoff import retry_with_constant_backoff
 
 
+@retry_with_constant_backoff(constant_delay=1, jitter=True, max_retries=3, errors=(OpenAIAPIError,))
 def generate_in_non_stream_mode(text: str) -> str:
     client = OpenAI(
         api_key=os.environ.get("ARK_API_KEY"),
