@@ -44,7 +44,7 @@ class TranslateAgent:
             translated_section_content = self.process_and_translate_text_chunk(original_part)
 
             # 3. 组合成中英交替格式
-            final_bilingual_parts.append(original_part.strip())
+            # final_bilingual_parts.append(original_part.strip())
             final_bilingual_parts.append(translated_section_content.strip())
 
         # 4. 写入输出文件
@@ -100,7 +100,7 @@ class TranslateAgent:
             )
             if is_special_content:
                 # 特殊内容原样保留
-                translated_parts.append(part)
+                translated_parts.append(f"\n{part}\n")
                 continue
 
             # 对于普通文本部分，进行大小检查和递归处理

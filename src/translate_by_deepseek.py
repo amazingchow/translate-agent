@@ -4,10 +4,12 @@ import re
 from openai import OpenAI
 from openai._exceptions import APIError as OpenAIAPIError
 
-from retry_with_backoff import retry_with_constant_backoff
+from retry_with_backoff import retry_with_exponential_backoff
 
 
-@retry_with_constant_backoff(constant_delay=1, jitter=True, max_retries=3, errors=(OpenAIAPIError,))
+@retry_with_exponential_backoff(
+    initial_delay=1, exponential_base=1.2, jitter=True, max_retries=3, errors=(OpenAIAPIError,)
+)
 def generate_in_non_stream_mode(text: str) -> str:
     client = OpenAI(
         api_key=os.environ.get("ARK_API_KEY"),

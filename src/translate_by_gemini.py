@@ -5,10 +5,12 @@ from google import genai
 from google.genai import types
 from google.genai.errors import APIError as GenAIAPIError
 
-from retry_with_backoff import retry_with_constant_backoff
+from retry_with_backoff import retry_with_exponential_backoff
 
 
-@retry_with_constant_backoff(constant_delay=1, jitter=True, max_retries=3, errors=(GenAIAPIError,))
+@retry_with_exponential_backoff(
+    initial_delay=1, exponential_base=1.2, jitter=True, max_retries=3, errors=(GenAIAPIError,)
+)
 def generate_in_non_stream_mode(text: str) -> str:
     client = genai.Client(
         api_key=os.environ.get("GEMINI_API_KEY"),
