@@ -122,15 +122,50 @@ if __name__ == "__main__":
 
     st = time.time()
     result = generate_in_non_stream_mode("""
-## How we built our multi-agent research system
+How many GPUs do I need to be able to serve Llama 70B? In order to answer that, you need to know how much GPU memory will be required by the Large Language Model.
 
-> Our Research feature uses multiple Claude agents to explore complex topics more effectively. We share the engineering challenges and the lessons we learned from building this system.
+The formula is simple:
 
-Claude now has [Research capabilities](https://www.anthropic.com/news/research) that allow it to search across the web, Google Workspace, and any integrations to accomplish complex tasks.
+```
+M = \frac{(P * 4B)}{\left(\frac{32}{Q}\right)} * 1.2
+```
 
-The journey of this multi-agent system from prototype to production taught us critical lessons about system architecture, tool design, and prompt engineering. A multi-agent system consists of multiple agents (LLMs autonomously using tools in a loop) working together. Our Research feature involves an agent that plans a research process based on user queries, and then uses tools to create parallel agents that search for information simultaneously. Systems with multiple agents introduce new challenges in agent coordination, evaluation, and reliability.
+| Symbol | Description |
+|--------|-------------|
+| M | GPU memory expressed in Gigabyte |
+| P | The amount of parameters in the model. E.g. a 7B model has 7 billion parameters |
+| 4B | 4 bytes, expressing the bytes used for each parameter |
+| 32 | There are 32 bits in 4 bytes |
+| Q | The amount of bits that should be used for loading the model. E.g. 16 bits, 8 bits or 4 bits |
+| 1.2 | Represents a 20% overhead of loading additional things in GPU memory |
 
-This post breaks down the principles that worked for us—we hope you'll find them useful to apply when building your own multi-agent systems. 
+Looking to deploy LLMs on Kubernetes? Check out KubeAI, providing private Open AI on Kubernetes.
+
+Now let's try out some examples.
+
+### GPU memory required for serving Llama 70B
+
+Let's try it out for Llama 70B that we will load in 16 bit. The model has 70 billion parameters.
+
+```
+\frac{70 * 4\text{bytes}}{32/16} * 1.2 = 168\text{GB}
+```
+
+That's quite a lot of memory. A single A100 80GB wouldn't be enough, although 2x A100 80GB should be enough to serve the Llama 2 70B model in 16 bit mode.
+
+**How to further reduce GPU memory required for Llama 2 70B?**
+
+Quantization is a method to reduce the memory footprint. Quantization is able to do this by reducing the precision of the model's parameters from floating-point to lower-bit representations, such as 8-bit integers. This process significantly decreases the memory and computational requirements, enabling more efficient deployment of the model, particularly on devices with limited resources. However, it requires careful management to maintain the model's performance, as reducing precision can potentially impact the accuracy of the outputs.
+
+In general, the consensus seems to be that 8 bit quantization achieves similar performance to using 16 bit. However, 4 bit quantization could have a noticeable impact to the model performance.
+
+Let's do another example where we use **4 bit quantization of Llama 2 70B:**
+
+```
+\frac{70 * 4\text{bytes}}{32/4} * 1.2 = 42\text{GB}
+```
+
+This is something you could run on 2 x L4 24GB GPUs.
 """)
     print(result)
     print(f"✅ 翻译耗时: {time.time() - st:.2f} 秒")
